@@ -1,0 +1,39 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "[python]": {
+            "editor.formatOnPaste": false,
+            "editor.formatOnSaveMode": "file",
+            "editor.formatOnSave": true,
+            "editor.codeActionsOnSave": {
+                "source.fixAll": "never",
+                "source.fixAll.ruff": "explicit",
+                "source.organizeImports": "explicit",
+            },
+            "editor.defaultFormatter": "charliermarsh.ruff"
+        },
+        "editor.formatOnPaste": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "never"
+        },
+        "python.terminal.activateEnvInCurrentTerminal": true,
+        "python.terminal.activateEnvironment": true,
+        "python.analysis.logLevel": "Warning",
+        "python.analysis.autoImportCompletions": true,
+        "python.analysis.diagnosticMode": "openFilesOnly",
+        "python.analysis.useLibraryCodeForTypes": true,
+        "python.analysis.completeFunctionParens": false,
+        "python.analysis.autoFormatStrings": true,
+        "python.analysis.gotoDefinitionInStringLiteral": true,
+        "python.analysis.enablePytestSupport": true,
+        "python.analysis.persistAllIndices": true,
+        "python.analysis.typeCheckingMode": "standard",
+        "python.analysis.autoSearchPaths": true,
+        "ruff.importStrategy": "fromEnvironment",
+        "ruff.organizeImports": true,
+    }
+}
