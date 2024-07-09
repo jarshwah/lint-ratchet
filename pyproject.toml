@@ -24,7 +24,6 @@ name = "lint_ratchet"
 version = "0.1-dev"
 dependencies = [
     "click",
-    "libcst",
 ]
 
 [project.urls]

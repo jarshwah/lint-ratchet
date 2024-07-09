@@ -1,3 +1,4 @@
+import io
 from textwrap import dedent
 
 from lint_ratchet import parsing
@@ -25,19 +26,19 @@ class TestExtractComments:
             """
         )
         num_comments = source.count("#")
-        suppressions = list(parsing.extract_comments(source))
+        suppressions = list(parsing.extract_comments(io.BytesIO(source.encode())))
         assert num_comments == len(suppressions)
         assert suppressions == [
             "# a module comment",
-            "# you got to the bottom?",
             "# noqa: F401",
             "# classb",
             "# noqa: RUF012",
             "# noqa: ANN001",
-            "# noqa: ANN002",
-            "# a method comment",
-            "# it's 7",
             "# ignore-this-1",
-            "# it's 8",
+            "# it's 7",
+            "# a method comment",
+            "# noqa: ANN002",
             "# ignore-this-2",
+            "# it's 8",
+            "# you got to the bottom?",
         ]
