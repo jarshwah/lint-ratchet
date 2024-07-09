@@ -9,6 +9,7 @@ build/
 
 # Linting
 .mypy_cache/
+.dmypy.json
 .import_linter_cache/
 
 # Testing
