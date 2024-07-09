@@ -12,6 +12,13 @@ class TestReadConfiguration:
         parsed = cast(configuration.ConfigDict, tomllib.loads(configuration.TOML_EXAMPLE))
         config = configuration.read_configuration(parsed)
         assert config.path.name == "src"
+        assert config.excluded_folders == [
+            "__pycache__",
+            ".git",
+            ".venv",
+            "node_modules",
+            ".mypy_cache",
+        ]
         rules = config.rules
         for tool in configuration.Tool:
             assert any(rule.tool == tool for rule in rules)
@@ -33,7 +40,7 @@ class TestReadConfiguration:
 
     def test_no_configuration(self):
         with pytest.raises(configuration.RatchetNotConfigured):
-            configuration.read_configuration({})
+            configuration.read_configuration({})  # type: ignore [typeddict-item]
 
     def test_violation_count_not_int(self):
         toml = dedent("""

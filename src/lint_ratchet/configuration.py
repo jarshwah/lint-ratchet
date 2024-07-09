@@ -9,6 +9,7 @@ from typing import NotRequired, Sequence, TypedDict
 TOML_EXAMPLE = """
 [tool.lint-ratchet]
 path = "src"
+exclude = ["__pycache__", ".git", ".venv", "node_modules", ".mypy_cache"]
 
 [tool.lint-ratchet.noqa]
 F401 = 0
@@ -30,6 +31,7 @@ RatchetDict = TypedDict(
     "RatchetDict",
     {
         "path": str,
+        "exclude": NotRequired[Sequence[str]],
         "noqa": NotRequired[dict[str, int]],
         "fixit": NotRequired[dict[str, int]],
         "fixit-ignore": NotRequired[dict[str, int]],
@@ -79,6 +81,7 @@ class Rule:
 class Config:
     path: pathlib.Path
     rules: Sequence[Rule]
+    excluded_folders: Sequence[str] = dataclasses.field(default_factory=list)
 
 
 def read_configuration(toml_config: ConfigDict) -> Config:
@@ -97,6 +100,9 @@ def read_configuration(toml_config: ConfigDict) -> Config:
         raise RatchetMisconfigured("[tool.lint-ratchet].path not found")
 
     path = ratchet_section["path"]
+    exclude = ratchet_section.get(
+        "exclude", ["__pycache__", ".git", ".venv", "node_modules", ".mypy_cache"]
+    )
 
     for tool in Tool:
         tool_section = ratchet_section.get(tool.value)
@@ -107,4 +113,4 @@ def read_configuration(toml_config: ConfigDict) -> Config:
                         f"Violation count for tool.lint-ratchet.{tool.value}.{code} must be a number"
                     )
                 rules.append(Rule(tool, code, int(violation_count)))
-    return Config(path=pathlib.Path(path), rules=rules)
+    return Config(path=pathlib.Path(path), rules=rules, excluded_folders=exclude)
