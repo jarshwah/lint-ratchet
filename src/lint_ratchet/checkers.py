@@ -1,6 +1,6 @@
 import dataclasses
 from collections import Counter
-from collections.abc import Sequence
+from collections.abc import Sequence, Set
 from typing import Protocol, TypeAlias
 
 from lint_ratchet.configuration import Rule, Tool
@@ -19,6 +19,14 @@ class Checker(Protocol):
     def __init__(self, rules: Sequence[Rule]) -> None: ...
 
     def check(self, comments: Sequence[Comment]) -> Sequence[Violation]: ...
+
+
+def get_checkers(rules: Sequence[Rule]) -> Set[Checker]:
+    tools = {rule.tool for rule in rules}
+    checkers = set()
+    if Tool.NOQA in tools:
+        checkers.add(NoQAChecker(rules))
+    return checkers
 
 
 class NoQAChecker:

@@ -1,5 +1,16 @@
-from lint_ratchet.checkers import NoQAChecker, Violation
+from lint_ratchet.checkers import NoQAChecker, Violation, get_checkers
 from lint_ratchet.configuration import Rule, Tool
+
+
+class TestGetCheckers:
+    def test_no_rules(self):
+        assert get_checkers([]) == set()
+
+    def test_noqa(self):
+        rules = [Rule(tool=Tool.NOQA, code="F401", violation_count=1)]
+        checkers = get_checkers(rules)
+        assert len(checkers) == 1
+        assert isinstance(list(checkers)[0], NoQAChecker)
 
 
 class TestNoQAChecker:
