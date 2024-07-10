@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 import enum
 import pathlib
+from collections.abc import Collection
 from typing import NotRequired, Sequence, TypedDict
 
 
@@ -81,7 +82,7 @@ class Rule:
 class Config:
     path: pathlib.Path
     rules: Sequence[Rule]
-    excluded_folders: Sequence[str] = dataclasses.field(default_factory=list)
+    excluded_folders: Collection[str] = dataclasses.field(default_factory=list)
 
 
 def read_configuration(toml_config: ConfigDict) -> Config:
