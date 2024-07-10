@@ -94,7 +94,7 @@ section-order = [
 
 [tool.mypy]
 files = "."
-exclude = "build/"
+exclude = ["build/", "tests/examples"]
 
 # Use strict defaults
 strict = true
