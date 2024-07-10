@@ -17,3 +17,8 @@ Usage:
     ratchet check           # Check for new violations and enforce the ratchet
 
 """
+
+import importlib.metadata
+
+
+__version__ = importlib.metadata.version("lint_ratchet")

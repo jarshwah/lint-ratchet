@@ -26,6 +26,9 @@ dependencies = [
     "click",
 ]
 
+[project.scripts]
+ratchet = "lint_ratchet.cli:main"
+
 [project.urls]
 # See https://daniel.feldroy.com/posts/2023-08-pypi-project-urls-cheatsheet for
 # additional URLs that can be included here.
