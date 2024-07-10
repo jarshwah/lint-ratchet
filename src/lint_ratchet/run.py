@@ -1,6 +1,7 @@
 import io
+import os
 import pathlib
-from collections.abc import Collection, Iterable, Set
+from collections.abc import Collection, Iterable, Iterator, Set
 
 from .checkers import Checker, Violation, get_checkers
 from .configuration import Config
@@ -19,8 +20,8 @@ def check_recursive(root: pathlib.Path, config: Config) -> Iterable[Violation]:
     checkers = get_checkers(config.rules)
     check = (root / config.path).resolve()
     violations: list[Violation] = []
-    for path in _recurse_paths([check], config.excluded_folders):
-        with path.open("rb") as file_like:
+    for path in _recurse_paths(os.scandir(check), config.excluded_folders):
+        with open(path, "rb") as file_like:
             violations.extend(list(check_file(file_like, checkers)))
     return violations
 
@@ -43,10 +44,10 @@ def check_file(file_like: io.BufferedIOBase, checkers: Set[Checker]) -> Iterable
 
 
 def _recurse_paths(
-    children: Iterable[pathlib.Path], excluded_folders: Collection[str]
-) -> Iterable[pathlib.Path]:
+    children: Iterator[os.DirEntry[str]], excluded_folders: Collection[str]
+) -> Iterator[os.DirEntry[str]]:
     for child in children:
-        if child.is_file() and child.suffix == ".py":
+        if child.is_file() and child.name.endswith(".py"):
             yield child
         elif child.is_dir() and child.name not in excluded_folders:
-            yield from _recurse_paths(child.iterdir(), excluded_folders)
+            yield from _recurse_paths(os.scandir(child), excluded_folders)
