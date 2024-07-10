@@ -59,6 +59,7 @@ extend-select = [
     "F",  # pyflakes
     "G", # flake8-logging-format
     "I",  # isort
+    "N",  # pep8-naming
 ]
 ignore = [
     # Ruff's formatter will try to respect the `line-length` setting

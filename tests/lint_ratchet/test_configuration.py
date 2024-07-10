@@ -39,7 +39,7 @@ class TestReadConfiguration:
         )
 
     def test_no_configuration(self):
-        with pytest.raises(configuration.RatchetNotConfigured):
+        with pytest.raises(configuration.RatchetNotConfiguredError):
             configuration.read_configuration({})  # type: ignore [typeddict-item]
 
     def test_violation_count_not_int(self):
@@ -48,5 +48,5 @@ class TestReadConfiguration:
             F401 = "wot"
         """)
         parsed = cast(configuration.ConfigDict, tomllib.loads(toml))
-        with pytest.raises(configuration.RatchetMisconfigured):
+        with pytest.raises(configuration.RatchetMisconfiguredError):
             configuration.read_configuration(parsed)
