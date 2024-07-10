@@ -18,7 +18,7 @@ def check_recursive(root: pathlib.Path, config: Config) -> Iterable[Violation]:
     checkers = get_checkers(config.rules)
     check = (root / config.path).resolve()
     violations: list[Violation] = []
-    for path in _children([check], config):
+    for path in _sub_directories([check], config):
         violations.extend(list(_check_file(path, config.rules, checkers)))
     return violations
 
@@ -33,9 +33,9 @@ def _check_file(
         yield from checker.check(comments)
 
 
-def _children(children: Iterable[pathlib.Path], config: Config) -> Iterable[pathlib.Path]:
+def _sub_directories(children: Iterable[pathlib.Path], config: Config) -> Iterable[pathlib.Path]:
     for child in children:
         if child.is_file() and child.suffix == ".py":
             yield child
         elif child.is_dir() and child.name not in config.excluded_folders:
-            yield from _children(child.iterdir(), config)
+            yield from _sub_directories(child.iterdir(), config)
