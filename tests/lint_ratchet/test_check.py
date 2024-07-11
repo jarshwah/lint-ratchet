@@ -41,13 +41,14 @@ class TestRecursePaths:
 
 class TestCheckRecursive:
     def test_violations_found(self):
-        root = pathlib.Path(__file__).parent.parent / "examples/"
+        root = pathlib.Path(__file__).parent.parent
         config = Config(
-            path=pathlib.Path("."),
+            path=pathlib.Path("examples/"),
             rules=[
                 Rule(tool=Tool.NOQA, code="F401", violation_count=1),
             ],
             excluded_folders=["excluded"],
         )
-        violations = list(check.check_recursive(root, config))
+        check_dir = root / config.path
+        violations = list(check.check_recursive(check_dir, config))
         assert violations == [Violation(rule="F401", count=2)]

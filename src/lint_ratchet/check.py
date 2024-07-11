@@ -8,7 +8,7 @@ from .configuration import Config
 from .parsing import extract_comments
 
 
-def check_recursive(root: pathlib.Path, config: Config) -> Iterable[Violation]:
+def check_recursive(check_dir: pathlib.Path, config: Config) -> Iterable[Violation]:
     """
     Check all python files in the given project directory for matching violation counts.
 
@@ -18,9 +18,8 @@ def check_recursive(root: pathlib.Path, config: Config) -> Iterable[Violation]:
     number of matches.
     """
     checkers = get_checkers(config.rules)
-    check = (root / config.path).resolve()
     violations: list[Violation] = []
-    for path in _recurse_paths(os.scandir(check), config.excluded_folders):
+    for path in _recurse_paths(os.scandir(check_dir), config.excluded_folders):
         with open(path, "rb") as file_like:
             violations.extend(list(check_file(file_like, checkers)))
     return violations
