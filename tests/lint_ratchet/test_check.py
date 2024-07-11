@@ -4,7 +4,7 @@ from textwrap import dedent
 
 from lint_ratchet import check
 from lint_ratchet.checkers import Violation, get_checkers
-from lint_ratchet.configuration import Rule, Tool
+from lint_ratchet.configuration import Config, Rule, Tool
 
 
 class TestCheckFile:
@@ -37,3 +37,17 @@ class TestRecursePaths:
         root = pathlib.Path(__file__).parent.parent / "examples/"
         paths = {p.name for p in check._recurse_paths([root], ["excluded"])}
         assert paths == {"example.py", "basic.py", "__init__.py"}
+
+
+class TestCheckRecursive:
+    def test_violations_found(self):
+        root = pathlib.Path(__file__).parent.parent / "examples/"
+        config = Config(
+            path=pathlib.Path("."),
+            rules=[
+                Rule(tool=Tool.NOQA, code="F401", violation_count=1),
+            ],
+            excluded_folders=["excluded"],
+        )
+        violations = list(check.check_recursive(root, config))
+        assert violations == [Violation(rule="F401", count=2)]
