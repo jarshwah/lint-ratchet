@@ -6,6 +6,8 @@ import pathlib
 from collections.abc import Collection
 from typing import NotRequired, Sequence, TypedDict
 
+import tomllib
+
 
 TOML_EXAMPLE = """
 [tool.lint-ratchet]
@@ -62,6 +64,10 @@ class RatchetMisconfiguredError(Exception):
     pass
 
 
+class ProjectFileNotFoundError(FileNotFoundError):
+    pass
+
+
 @enum.unique
 class Tool(str, enum.Enum):
     NOQA = "noqa"
@@ -114,4 +120,19 @@ def read_configuration(toml_config: ConfigDict) -> Config:
                         f"Violation count for tool.lint-ratchet.{tool.value}.{code} must be a number"
                     )
                 rules.append(Rule(tool, code, int(violation_count)))
-    return Config(path=pathlib.Path(path), rules=rules, excluded_folders=exclude)
+    return Config(pathlib.Path(path), rules=rules, excluded_folders=exclude)
+
+
+def open_configuration(
+    root_path: pathlib.Path, config_file_name: str = "pyproject.toml"
+) -> Config:
+    """
+    Open and parse the configuration file.
+    """
+    config_file = (root_path / config_file_name).resolve()
+    if not config_file.exists():
+        raise ProjectFileNotFoundError(f"Configuration file {config_file} not found")
+
+    with config_file.open("rb") as fp:
+        toml = tomllib.load(fp)
+    return read_configuration(toml)  # type: ignore [arg-type]

@@ -1,3 +1,4 @@
+import pathlib
 from textwrap import dedent
 from typing import cast
 
@@ -50,3 +51,10 @@ class TestReadConfiguration:
         parsed = cast(configuration.ConfigDict, tomllib.loads(toml))
         with pytest.raises(configuration.RatchetMisconfiguredError):
             configuration.read_configuration(parsed)
+
+
+class TestOpenConfiguration:
+    def test_example_config_loads(self):
+        root = pathlib.Path(__file__).parent.parent / "examples"
+        config = configuration.open_configuration(root)
+        assert config.path == pathlib.Path(".")
