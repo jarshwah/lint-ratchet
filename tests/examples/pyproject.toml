@@ -4,7 +4,7 @@ version = "0.0.0"
 
 [tool.lint-ratchet]
 path = "."
-exclude = ["__pycache__", ".git", ".venv", ".mypy_cache"]
+exclude = ["__pycache__", ".git", ".venv", ".mypy_cache", "excluded"]
 
 [tool.lint-ratchet.noqa]
-F401 = 100
+F401 = 1
