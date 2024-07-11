@@ -2,7 +2,7 @@ import io
 import pathlib
 from textwrap import dedent
 
-from lint_ratchet import run
+from lint_ratchet import check
 from lint_ratchet.checkers import Violation, get_checkers
 from lint_ratchet.configuration import Rule, Tool
 
@@ -25,7 +25,7 @@ class TestCheckFile:
                 return None
             """
         )
-        violations = list(run.check_file(io.BytesIO(source.encode()), checkers))
+        violations = list(check.check_file(io.BytesIO(source.encode()), checkers))
         assert violations == [
             Violation(rule="F401", count=2),
             Violation(rule="G007", count=1),
@@ -35,5 +35,5 @@ class TestCheckFile:
 class TestRecursePaths:
     def test_paths_found_with_exclusion(self):
         root = pathlib.Path(__file__).parent.parent / "examples/"
-        paths = {p.name for p in run._recurse_paths([root], ["excluded"])}
+        paths = {p.name for p in check._recurse_paths([root], ["excluded"])}
         assert paths == {"example.py", "basic.py", "__init__.py"}
