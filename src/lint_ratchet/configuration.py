@@ -112,10 +112,7 @@ def open_configuration(root_path: pathlib.Path, config_file_name: str = ".ratche
     """
     Open and parse the configuration file.
     """
-    if root_path.is_file() and root_path.name == config_file_name:
-        config_file = root_path.resolve()
-    else:
-        config_file = (root_path / config_file_name).resolve()
+    config_file = get_configuration_path(root_path, config_file_name)
 
     if not config_file.exists():
         raise ProjectFileNotFoundError(f"Configuration file {config_file} not found")
@@ -130,3 +127,19 @@ def write_configuration(config: Config, destination: IO[str]) -> str:
     Write the configuration to the file.
     """
     return tomllib.dump(config.to_toml_dict(), destination)
+
+
+def get_configuration_path(
+    root_path: pathlib.Path, config_file_name: str = ".ratchet.toml"
+) -> pathlib.Path:
+    """
+    Return the path to the configuration file.
+
+    Given a root directory and a filename, return the path to the configuration file.
+
+    If the root directory is a file and has the same name as the configuration file,
+    use that. Otherwise, append the configuration file name to the root directory and return.
+    """
+    if root_path.is_file() and root_path.name == config_file_name:
+        return root_path.resolve()
+    return (root_path / config_file_name).resolve()
