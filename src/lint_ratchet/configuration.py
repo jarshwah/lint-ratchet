@@ -104,7 +104,11 @@ def open_configuration(root_path: pathlib.Path, config_file_name: str = ".ratche
     """
     Open and parse the configuration file.
     """
-    config_file = (root_path / config_file_name).resolve()
+    if root_path.is_file() and root_path.name == config_file_name:
+        config_file = root_path.resolve()
+    else:
+        config_file = (root_path / config_file_name).resolve()
+
     if not config_file.exists():
         raise ProjectFileNotFoundError(f"Configuration file {config_file} not found")
 

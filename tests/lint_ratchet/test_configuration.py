@@ -64,3 +64,17 @@ class TestOpenConfiguration:
         root = pathlib.Path(__file__).parent.parent / "examples"
         config = configuration.open_configuration(root)
         assert config.path == pathlib.Path(".")
+
+    def test_example_config_not_found(self):
+        with pytest.raises(configuration.ProjectFileNotFoundError):
+            configuration.open_configuration(pathlib.Path("/tmp/madeup"))
+
+    def test_example_config_loads_when_path_is_file(self):
+        root = pathlib.Path(__file__).parent.parent / "examples" / ".ratchet.toml"
+        config = configuration.open_configuration(root)
+        assert config.path == pathlib.Path(".")
+
+    def test_not_found_when_not_configuration_file(self):
+        root = pathlib.Path(__file__).parent.parent / "examples" / "__init__.py"
+        with pytest.raises(configuration.ProjectFileNotFoundError):
+            configuration.open_configuration(root)
