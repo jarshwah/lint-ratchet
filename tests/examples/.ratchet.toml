@@ -1,0 +1,5 @@
+path = "."
+exclude = ["__pycache__", ".git", ".venv", ".mypy_cache", "excluded"]
+
+[noqa]
+F401 = 1

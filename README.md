@@ -8,7 +8,7 @@ and enforces that number does not increase over time.
 Ratchet is useful where you begin with a large number of violations that you want
 to gradually reduce over time.
 
-The mapping of lint codes to violation counts are stored in the pyproject.toml
+The mapping of lint codes to violation counts are stored in a .ratchet.toml configuration
 file.
 
 Usage:

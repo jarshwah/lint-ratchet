@@ -24,6 +24,7 @@ name = "lint_ratchet"
 version = "0.1-dev"
 dependencies = [
     "click",
+    "toml",
 ]
 
 [project.scripts]
@@ -44,6 +45,7 @@ dev = [
     "ruff",
     "mypy",
     "pre-commit",
+    "types-toml",
     # Tools
     "ipdb",
 ]

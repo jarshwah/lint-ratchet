@@ -27,14 +27,13 @@ class MainOptions:
         path_type=pathlib.Path,
     ),
     default=".",
-    help="The path to the root of the project to check, where the pyproject.toml file is located. Defaults to the current directory.",
+    help="The path to the root of the project to check, where the .ratchet.toml file is located. Defaults to the current directory.",
 )
 def main(ctx: click.Context, root: pathlib.Path) -> None:
     try:
         config = configuration.open_configuration(root)
     except (
         configuration.ProjectFileNotFoundError,
-        configuration.RatchetNotConfiguredError,
         configuration.RatchetMisconfiguredError,
     ) as e:
         raise click.ClickException(str(e)) from e
@@ -62,3 +61,21 @@ def check(ctx: click.Context) -> None:
     if failures:
         raise click.ClickException(click.style(f"❌ {failures}/{rule_num} failed", fg="red"))
     click.secho("✅ All rules passed", fg="green", err=True)
+
+
+@main.command()
+@click.pass_context
+def crank(ctx: click.Context) -> None:
+    main_options = cast(MainOptions, ctx.obj)
+    num = 0
+    for result in usecases.crank(main_options.check_dir, main_options.config, main_options.root):
+        click.secho(
+            f"{result.rule.tool.value}.{result.rule.code} cranked: {result.rule.violation_count} -> {result.new_count}",
+            fg="green",
+        )
+        num += 1
+
+    if num > 0:
+        click.secho(f"✅ {num} rules cranked", fg="green", err=True)
+    else:
+        click.secho("No rules were cranked", fg="yellow", err=True)

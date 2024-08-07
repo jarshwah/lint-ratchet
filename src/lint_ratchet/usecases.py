@@ -27,3 +27,29 @@ def check(check_dir: pathlib.Path, config: configuration.Config) -> Iterable[Che
 
     for rule in config.rules:
         yield CheckResult(rule, counts[rule.code])
+
+
+def crank(
+    check_dir: pathlib.Path, config: configuration.Config, root_dir: pathlib.Path
+) -> Iterable[CheckResult]:
+    """
+    Recompute the violation counts and write the results back if they are lower.
+    """
+    counts: Counter[str] = Counter()
+    for violation in check_module.check_recursive(check_dir, config):
+        counts[violation.rule] += violation.count
+
+    new_rules = []
+    cranked = []
+    for rule in config.rules:
+        if (new_count := counts[rule.code]) < rule.violation_count:
+            new_rules.append(dataclasses.replace(rule, violation_count=new_count))
+            cranked.append(CheckResult(rule, new_count))
+
+    if cranked:
+        new_config = dataclasses.replace(config, rules=new_rules)
+        config_path = configuration.get_configuration_path(root_dir)
+        with config_path.open("w") as f:
+            configuration.write_configuration(new_config, f)
+
+    return cranked

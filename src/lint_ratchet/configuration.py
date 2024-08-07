@@ -4,34 +4,33 @@ import dataclasses
 import enum
 import pathlib
 from collections.abc import Collection
-from typing import NotRequired, Sequence, TypedDict
+from typing import IO, NotRequired, Sequence, TypedDict
 
-import tomllib
+import toml as tomllib
 
 
 TOML_EXAMPLE = """
-[tool.lint-ratchet]
 path = "src"
 exclude = ["__pycache__", ".git", ".venv", "node_modules", ".mypy_cache"]
 
-[tool.lint-ratchet.noqa]
+[noqa]
 F401 = 0
 
-[tool.lint-ratchet.fixit]
+[fixit]
 FixitRule = 43
 
-[tool.lint-ratchet.fixit-ignore]
+[fixit-ignore]
 FixitRuleIgnoreOnly = 3
 
-[tool.lint-ratchet.fixit-fixme]
+[fixit-fixme]
 FixitRuleFixmeOnly = 43
 
-[tool.lint-ratchet.mypy]
+[mypy]
 assignment = 2
 """
 
-RatchetDict = TypedDict(
-    "RatchetDict",
+RatchetConfig = TypedDict(
+    "RatchetConfig",
     {
         "path": str,
         "exclude": NotRequired[Sequence[str]],
@@ -42,22 +41,6 @@ RatchetDict = TypedDict(
         "mypy": NotRequired[dict[str, int]],
     },
 )
-
-
-ToolDict = TypedDict(
-    "ToolDict",
-    {
-        "lint-ratchet": RatchetDict,
-    },
-)
-
-
-class ConfigDict(TypedDict):
-    tool: ToolDict
-
-
-class RatchetNotConfiguredError(Exception):
-    pass
 
 
 class RatchetMisconfiguredError(Exception):
@@ -90,49 +73,73 @@ class Config:
     rules: Sequence[Rule]
     excluded_folders: Collection[str] = dataclasses.field(default_factory=list)
 
+    def to_toml_dict(self) -> RatchetConfig:
+        config = RatchetConfig(path=str(self.path))
+        if self.excluded_folders:
+            config["exclude"] = list(self.excluded_folders)
+        for rule in self.rules:
+            config.setdefault(rule.tool.value, {})[rule.code] = rule.violation_count  # type: ignore[misc]
+        return config
 
-def read_configuration(toml_config: ConfigDict) -> Config:
+
+def read_configuration(toml_config: RatchetConfig) -> Config:
     """
     Read the configuration from a parsed TOML file.
     """
     rules: list[Rule] = []
-    try:
-        ratchet_section = toml_config["tool"]["lint-ratchet"]
-        if not isinstance(ratchet_section, dict):
-            raise RatchetMisconfiguredError("[tool.lint-ratchet] section must be a dictionary")
-    except KeyError:
-        raise RatchetNotConfiguredError("[tool.lint-ratchet] section not found") from None
 
-    if "path" not in ratchet_section:
-        raise RatchetMisconfiguredError("[tool.lint-ratchet].path not found")
+    if "path" not in toml_config:
+        raise RatchetMisconfiguredError("Key `path` not found")
 
-    path = ratchet_section["path"]
-    exclude = ratchet_section.get(
+    path = toml_config["path"]
+    exclude = toml_config.get(
         "exclude", ["__pycache__", ".git", ".venv", "node_modules", ".mypy_cache"]
     )
 
     for tool in Tool:
-        tool_section = ratchet_section.get(tool.value)
+        tool_section = toml_config.get(tool.value)
         if isinstance(tool_section, dict):
             for code, violation_count in tool_section.items():
                 if not isinstance(violation_count, int):
                     raise RatchetMisconfiguredError(
-                        f"Violation count for tool.lint-ratchet.{tool.value}.{code} must be a number"
+                        f"Violation count for `{tool.value}.{code}` must be a number"
                     )
                 rules.append(Rule(tool, code, int(violation_count)))
     return Config(pathlib.Path(path), rules=rules, excluded_folders=exclude)
 
 
-def open_configuration(
-    root_path: pathlib.Path, config_file_name: str = "pyproject.toml"
-) -> Config:
+def open_configuration(root_path: pathlib.Path, config_file_name: str = ".ratchet.toml") -> Config:
     """
     Open and parse the configuration file.
     """
-    config_file = (root_path / config_file_name).resolve()
+    config_file = get_configuration_path(root_path, config_file_name)
+
     if not config_file.exists():
         raise ProjectFileNotFoundError(f"Configuration file {config_file} not found")
 
-    with config_file.open("rb") as fp:
+    with config_file.open("r") as fp:
         toml = tomllib.load(fp)
     return read_configuration(toml)  # type: ignore [arg-type]
+
+
+def write_configuration(config: Config, destination: IO[str]) -> str:
+    """
+    Write the configuration to the file.
+    """
+    return tomllib.dump(config.to_toml_dict(), destination)
+
+
+def get_configuration_path(
+    root_path: pathlib.Path, config_file_name: str = ".ratchet.toml"
+) -> pathlib.Path:
+    """
+    Return the path to the configuration file.
+
+    Given a root directory and a filename, return the path to the configuration file.
+
+    If the root directory is a file and has the same name as the configuration file,
+    use that. Otherwise, append the configuration file name to the root directory and return.
+    """
+    if root_path.is_file() and root_path.name == config_file_name:
+        return root_path.resolve()
+    return (root_path / config_file_name).resolve()

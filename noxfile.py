@@ -21,6 +21,6 @@ def tests(session: nox.Session) -> None:
     # When run in CircleCI, create JUnit XML test results.
     commands = ["pytest"]
     if "CIRCLECI" in os.environ:
-        commands.append(f"--junitxml=test-results/junit.{session.name}.xml")
+        commands.append(f"--junitxml=test-results/junit.{session.python}.xml")
 
     session.run(*commands, *session.posargs)
