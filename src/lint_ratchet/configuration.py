@@ -4,7 +4,7 @@ import dataclasses
 import enum
 import pathlib
 from collections.abc import Collection
-from typing import NotRequired, Sequence, TypedDict
+from typing import IO, NotRequired, Sequence, TypedDict
 
 import toml as tomllib
 
@@ -73,6 +73,14 @@ class Config:
     rules: Sequence[Rule]
     excluded_folders: Collection[str] = dataclasses.field(default_factory=list)
 
+    def to_toml_dict(self) -> RatchetConfig:
+        config = RatchetConfig(path=str(self.path))
+        if self.excluded_folders:
+            config["exclude"] = list(self.excluded_folders)
+        for rule in self.rules:
+            config.setdefault(rule.tool.value, {})[rule.code] = rule.violation_count  # type: ignore[misc]
+        return config
+
 
 def read_configuration(toml_config: RatchetConfig) -> Config:
     """
@@ -115,3 +123,10 @@ def open_configuration(root_path: pathlib.Path, config_file_name: str = ".ratche
     with config_file.open("r") as fp:
         toml = tomllib.load(fp)
     return read_configuration(toml)  # type: ignore [arg-type]
+
+
+def write_configuration(config: Config, destination: IO[str]) -> str:
+    """
+    Write the configuration to the file.
+    """
+    return tomllib.dump(config.to_toml_dict(), destination)
