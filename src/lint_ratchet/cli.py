@@ -34,7 +34,6 @@ def main(ctx: click.Context, root: pathlib.Path) -> None:
         config = configuration.open_configuration(root)
     except (
         configuration.ProjectFileNotFoundError,
-        configuration.RatchetNotConfiguredError,
         configuration.RatchetMisconfiguredError,
     ) as e:
         raise click.ClickException(str(e)) from e
