@@ -6,7 +6,7 @@ import pathlib
 from collections.abc import Collection
 from typing import NotRequired, Sequence, TypedDict
 
-import tomllib
+import toml as tomllib
 
 
 TOML_EXAMPLE = """
@@ -112,6 +112,6 @@ def open_configuration(root_path: pathlib.Path, config_file_name: str = ".ratche
     if not config_file.exists():
         raise ProjectFileNotFoundError(f"Configuration file {config_file} not found")
 
-    with config_file.open("rb") as fp:
+    with config_file.open("r") as fp:
         toml = tomllib.load(fp)
     return read_configuration(toml)  # type: ignore [arg-type]
