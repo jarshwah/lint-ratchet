@@ -27,7 +27,7 @@ class MainOptions:
         path_type=pathlib.Path,
     ),
     default=".",
-    help="The path to the root of the project to check, where the pyproject.toml file is located. Defaults to the current directory.",
+    help="The path to the root of the project to check, where the .ratchet.toml file is located. Defaults to the current directory.",
 )
 def main(ctx: click.Context, root: pathlib.Path) -> None:
     try:

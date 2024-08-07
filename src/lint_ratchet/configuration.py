@@ -100,9 +100,7 @@ def read_configuration(toml_config: RatchetConfig) -> Config:
     return Config(pathlib.Path(path), rules=rules, excluded_folders=exclude)
 
 
-def open_configuration(
-    root_path: pathlib.Path, config_file_name: str = "pyproject.toml"
-) -> Config:
+def open_configuration(root_path: pathlib.Path, config_file_name: str = ".ratchet.toml") -> Config:
     """
     Open and parse the configuration file.
     """
