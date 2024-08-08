@@ -39,10 +39,6 @@ jobs:
           name: Install dependencies
           command: make dev
 
-      - run:
-          name: Show uv cache directory
-          command: uv cache dir
-
       - save_cache:
           name: Save venv cache
           key: *lint-cache-key
