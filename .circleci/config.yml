@@ -19,18 +19,28 @@ jobs:
             echo "source /home/circleci/venv/bin/activate" >> $BASH_ENV
 
       - restore_cache:
+          name: Restore venv cache
           keys:
             - &lint-cache-key python-3.12-uv-v3-{{ checksum "requirements/development.txt" }}
+
+      - run:
+          name: Create pre-commit cache key
+          command: |
+            cp .pre-commit-config.yaml pre-commit-cache-key.txt
+            python --version >> pre-commit-cache-key.txt
+
+      - restore_cache:
+          name: Restore pre-commit cache
+          keys:
+            - &precommit-cache-key pre-commit-v2-{{ checksum "pre-commit-cache-key.txt" }}
+            - pre-commit-v2-
 
       - run:
           name: Install dependencies
           command: make dev
 
-      - run:
-          name: Show uv cache directory
-          command: uv cache dir
-
       - save_cache:
+          name: Save venv cache
           key: *lint-cache-key
           paths:
             - "~/venv/"
@@ -59,6 +69,12 @@ jobs:
             SKIP: ruff-lint,ruff-format,no-commit-to-branch
           command: pre-commit run --all-files
           when: always
+
+      - save_cache:
+          name: Save pre-commit cache
+          key: *precommit-cache-key
+          paths:
+            - "~/.cache/pre-commit"
 
       - store_test_results:
           path: test-results
